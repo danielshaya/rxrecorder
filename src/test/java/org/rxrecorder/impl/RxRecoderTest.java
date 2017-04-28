@@ -29,8 +29,11 @@ public class RxRecoderTest {
         rxRecorder.writeToFile("/tmp/rectest/rctext.txt", true);
 
         //Get the input from the recorder
-        ReplayOptions options= new ReplayOptions().filter(HelloWorldApp.INPUT_FILTER).replayStrategy(REPLAY_STRATEGY);
-        ConnectableObservable<Byte> observableInput = rxRecorder.replay(options);
+        ReplayOptions options= new ReplayOptions()
+                .filter(HelloWorldApp.INPUT_FILTER)
+                .replayStrategy(REPLAY_STRATEGY)
+                .waitForMoreItems(false);
+        ConnectableObservable<Byte> observableInput = rxRecorder.play(options);
 
         BytesToWords bytesToWords = new BytesToWords();
         Observable<String> observableOutput = bytesToWords.init(observableInput);

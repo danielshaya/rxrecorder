@@ -48,8 +48,8 @@ public class TradeApp {
         }
 
         if(mode == Mode.REPLAY) {
-            tradeObservable1 = rxRecorder.replay(new ReplayOptions().filter("HT1"));
-            tradeObservable2 = rxRecorder.replay(new ReplayOptions().filter("HT2"));
+            tradeObservable1 = rxRecorder.play(new ReplayOptions().filter("HT1"));
+            tradeObservable2 = rxRecorder.play(new ReplayOptions().filter("HT2"));
         }
 
         TradeEngine engine1 = new TradeEngine("TE1");

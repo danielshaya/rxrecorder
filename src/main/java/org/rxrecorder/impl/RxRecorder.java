@@ -11,6 +11,7 @@ import org.rxrecorder.util.DSUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
+import rx.Subscriber;
 import rx.observables.ConnectableObservable;
 import rx.subjects.PublishSubject;
 import rx.subjects.Subject;
@@ -33,76 +34,38 @@ public class RxRecorder {
 
     public enum Replay {REAL_TIME, FAST}
 
-    public ConnectableObservable replay(ReplayOptions options) {
-        Observable observable = Observable.create(s -> {
+    public ConnectableObservable play(ReplayOptions options) {
+        long fromTime = System.currentTimeMillis();
+
+        Observable observable = Observable.create(subscriber -> {
             try (ChronicleQueue queue = SingleChronicleQueueBuilder.binary(fileName).build()) {
                 ExcerptTailer tailer = queue.createTailer();
                 long[] lastTime = new long[]{Long.MIN_VALUE};
-                while (
-                    tailer.readDocument(w -> {
+                while (true) {
+
+                    boolean foundItem = tailer.readDocument(w -> {
                         ValueIn in = w.getValueIn();
-                        long time = in.int64();
-                        String storedFilter = in.text();
-                        if(options.playUntil() > time){
-                            s.onCompleted();
-                            return;
+                        long recordedAtTime = in.int64();
+                        String storedWithFilter = in.text();
+
+                        if (testEndOfStream(subscriber, storedWithFilter)) return;
+
+                        if (testPastPlayUntil(options, subscriber, recordedAtTime)) return;
+
+                        if (options.playFrom() > recordedAtTime
+                                && (!options.playFromNow() || fromTime < recordedAtTime)) {
+                            pause(options, lastTime, recordedAtTime);
+
+                            if (options.filter().equals(storedWithFilter)) {
+                                subscriber.onNext(getStoredObject(options, in));
+                            }
+                            lastTime[0] = recordedAtTime;
                         }
-                        if(options.playFrom() > time) {
-                            if (options.replayStrategy() == Replay.REAL_TIME && lastTime[0] != Long.MIN_VALUE) {
-                                DSUtil.sleep((int) (time - lastTime[0]));
-                            }
-                            if (options.using() != null) {
-                                in.object(options.using(), options.using().getClass());
-                                if (options.filter().equals(storedFilter)) {
-                                    s.onNext(options.using());
-                                }
-                            } else {
-                                if (options.filter().equals(storedFilter)) {
-                                    Object obj = in.object();
-                                    s.onNext(obj);
-                                }
-                            }
-                            lastTime[0] = time;
-                        }
-                    }));
-                }
-            s.onCompleted();
-
-        });
-        return observable.publish();
-    }
-
-    public ConnectableObservable remoteObservable(ReplayOptions options) {
-        long fromTime = System.currentTimeMillis();
-
-        Observable observable = Observable.create(s -> {
-            try (ChronicleQueue queue = SingleChronicleQueueBuilder.binary(fileName).build()) {
-                ExcerptTailer tailer = queue.createTailer();
-                while (true){
-                        tailer.readDocument(w -> {
-                            ValueIn in = w.getValueIn();
-                            long time = in.int64();
-                            String storedFilter = in.text();
-                            if(!options.playFromNow() || fromTime < time) {
-                                if (options.using() != null) {
-                                    if (options.filter().equals(storedFilter)) {
-                                        //todo doesn't seem to work for Bytes
-                                        in.object(options.using(), options.using().getClass());
-                                        System.out.println(options.using());
-                                        s.onNext(options.using());
-                                    }
-                                } else {
-                                    if (options.filter().equals(storedFilter)) {
-                                        Object obj = in.object();
-                                        s.onNext(obj);
-                                    } else if (storedFilter.equals(END_OF_STREAM)) {
-                                        s.onCompleted();
-                                    }
-                                }
-                                //todo make this a pluggle pause strategy
-                                DSUtil.sleep(10);
-                            }
-                        });
+                    });
+                    if (!foundItem && !options.waitForMoreItems()) {
+                        subscriber.onCompleted();
+                        return;
+                    }
                 }
             }
 
@@ -110,6 +73,38 @@ public class RxRecorder {
         return observable.publish();
     }
 
+    private boolean testPastPlayUntil(ReplayOptions options, Subscriber<? super Object> s, long recordedAtTime) {
+        if(options.playUntil() > recordedAtTime){
+            s.onCompleted();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean testEndOfStream(Subscriber<? super Object> s, String storedWithFilter) {
+        if (storedWithFilter.equals(END_OF_STREAM)) {
+            s.onCompleted();
+            return true;
+        }
+        return false;
+    }
+
+    private Object getStoredObject(ReplayOptions options, ValueIn in) {
+        Object storedObject;
+        if (options.using() != null) {
+            storedObject = in.object(options.using(), options.using().getClass());
+        } else {
+            storedObject = in.object();
+        }
+        return storedObject;
+    }
+
+    private void pause(ReplayOptions options, long[] lastTime, long recordedAtTime) {
+        if (options.replayStrategy() == Replay.REAL_TIME && lastTime[0] != Long.MIN_VALUE) {
+            DSUtil.sleep((int) (recordedAtTime - lastTime[0]));
+        }
+        //todo add configurable pause strategy
+    }
 
     public Observable<ValidationResult> validate(Observable observable, String filter) {
         Subject<ValidationResult, ValidationResult>  validatorPublisher = PublishSubject.create();

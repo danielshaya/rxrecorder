@@ -11,6 +11,7 @@ public class ReplayOptions {
     private boolean playFromNow = false;
     private long playFrom = Long.MAX_VALUE;
     private long playUntil = Long.MIN_VALUE;
+    private boolean waitForMoreItems = true;
 
     public String filter() {
         return filter;
@@ -71,6 +72,15 @@ public class ReplayOptions {
 
     public ReplayOptions playUntil(long playUntil) {
         this.playUntil = playUntil;
+        return this;
+    }
+
+    public boolean waitForMoreItems() {
+        return waitForMoreItems;
+    }
+
+    public ReplayOptions waitForMoreItems(boolean waitForMoreItems) {
+        this.waitForMoreItems = waitForMoreItems;
         return this;
     }
 }

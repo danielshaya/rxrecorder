@@ -41,7 +41,7 @@ public class MarketDataApp {
         }
 
         if(mode == Mode.REPLAY) {
-           marketDataObservable = rxRecorder.replay(new ReplayOptions());
+           marketDataObservable = rxRecorder.play(new ReplayOptions());
         }
 
         marketDataObservable.subscribe(marketDataEngine);

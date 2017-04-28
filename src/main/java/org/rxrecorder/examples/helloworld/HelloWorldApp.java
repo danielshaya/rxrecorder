@@ -16,7 +16,7 @@ public class HelloWorldApp {
     private static final Logger LOG = LoggerFactory.getLogger(HelloWorldApp.class.getName());
 
     public final static String FILE_NAME = System.getProperty("filename", "/tmp/Demo");
-    public final static int INTERVAL_MS = 100;
+    public final static int INTERVAL_MS = 1000;
     public final static String INPUT_FILTER = "input";
     public final static String OUTPUT_FILTER = "output";
 

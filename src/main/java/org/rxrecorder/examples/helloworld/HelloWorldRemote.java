@@ -21,7 +21,7 @@ public class HelloWorldRemote {
         rxRecorder.init(HelloWorldApp.FILE_NAME, false);
         //Get the input from the remote process
         ReplayOptions options = new ReplayOptions().filter(HelloWorldApp.INPUT_FILTER).playFromNow(true);
-        ConnectableObservable<Byte> remoteInput = rxRecorder.remoteObservable(options);
+        ConnectableObservable<Byte> remoteInput = rxRecorder.play(options);
 
         BytesToWords bytesToWords = new BytesToWords();
         Observable<String> observableOutput = bytesToWords.init(remoteInput);
