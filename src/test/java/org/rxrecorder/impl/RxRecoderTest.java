@@ -33,7 +33,7 @@ public class RxRecoderTest {
                 .filter(HelloWorldApp.INPUT_FILTER)
                 .replayStrategy(REPLAY_STRATEGY)
                 .waitForMoreItems(false);
-        ConnectableObservable<Byte> observableInput = rxRecorder.play(options);
+        ConnectableObservable<Byte> observableInput = rxRecorder.play(options).publish();
 
         BytesToWords bytesToWords = new BytesToWords();
         Observable<String> observableOutput = bytesToWords.init(observableInput);

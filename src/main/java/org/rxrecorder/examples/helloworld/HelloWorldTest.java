@@ -30,7 +30,7 @@ public class HelloWorldTest {
 
         //Get the input from the recorder
         ReplayOptions options= new ReplayOptions().filter(HelloWorldApp.INPUT_FILTER).replayStrategy(REPLAY_STRATEGY);
-        ConnectableObservable<Byte> observableInput = rxRecorder.play(options);
+        ConnectableObservable<Byte> observableInput = rxRecorder.play(options).publish();
 
         BytesToWords bytesToWords = new BytesToWords();
         Observable<String> observableOutput = bytesToWords.init(observableInput);

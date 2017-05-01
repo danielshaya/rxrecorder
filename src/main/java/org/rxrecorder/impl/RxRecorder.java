@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
 import rx.Subscriber;
-import rx.observables.ConnectableObservable;
 import rx.subjects.PublishSubject;
 import rx.subjects.Subject;
 
@@ -34,13 +33,14 @@ public class RxRecorder {
 
     public enum Replay {REAL_TIME, FAST}
 
-    public ConnectableObservable play(ReplayOptions options) {
+    public Observable play(ReplayOptions options) {
         long fromTime = System.currentTimeMillis();
 
         Observable observable = Observable.create(subscriber -> {
             try (ChronicleQueue queue = SingleChronicleQueueBuilder.binary(fileName).build()) {
                 ExcerptTailer tailer = queue.createTailer();
                 long[] lastTime = new long[]{Long.MIN_VALUE};
+                boolean[] stop = new boolean[]{false};
                 while (true) {
 
                     boolean foundItem = tailer.readDocument(w -> {
@@ -48,9 +48,15 @@ public class RxRecorder {
                         long recordedAtTime = in.int64();
                         String storedWithFilter = in.text();
 
-                        if (testEndOfStream(subscriber, storedWithFilter)) return;
+                        if (testEndOfStream(subscriber, storedWithFilter)) {
+                            stop[0] = true;
+                            return;
+                        }
 
-                        if (testPastPlayUntil(options, subscriber, recordedAtTime)) return;
+                        if (testPastPlayUntil(options, subscriber, recordedAtTime)){
+                            stop[0] = true;
+                            return;
+                        }
 
                         if (options.playFrom() > recordedAtTime
                                 && (!options.playFromNow() || fromTime < recordedAtTime)) {
@@ -62,7 +68,7 @@ public class RxRecorder {
                             lastTime[0] = recordedAtTime;
                         }
                     });
-                    if (!foundItem && !options.waitForMoreItems()) {
+                    if (!foundItem && !options.waitForMoreItems() || stop[0]) {
                         subscriber.onCompleted();
                         return;
                     }
@@ -70,7 +76,7 @@ public class RxRecorder {
             }
 
         });
-        return observable.publish();
+        return observable;
     }
 
     private boolean testPastPlayUntil(ReplayOptions options, Subscriber<? super Object> s, long recordedAtTime) {
@@ -158,6 +164,10 @@ public class RxRecorder {
             return getNextMatchingFilter(tailer, filter);
         }
 
+    }
+
+    public void recordAsync(Observable<?> observable, String filter){
+        new Thread(()->record(observable,filter)).start();
     }
 
     public void record(Observable<?> observable){

@@ -28,8 +28,8 @@ public class TradeAppTest {
         rxRecorder.init(file, false);
 
 
-        ConnectableObservable<Trade> tradeObservable1 = rxRecorder.play(new ReplayOptions().filter("HT1"));
-        ConnectableObservable<Trade> tradeObservable2 = rxRecorder.play(new ReplayOptions().filter("HT2"));
+        ConnectableObservable<Trade> tradeObservable1 = rxRecorder.play(new ReplayOptions().filter("HT1")).publish();
+        ConnectableObservable<Trade> tradeObservable2 = rxRecorder.play(new ReplayOptions().filter("HT2")).publish();
 
 
         TradeEngine engine1 = new TradeEngine("TE1");
