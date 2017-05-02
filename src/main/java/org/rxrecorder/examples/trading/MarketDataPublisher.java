@@ -29,9 +29,8 @@ public class MarketDataPublisher {
             scheduledExecutorService.scheduleAtFixedRate(() -> {
                 int count = counter.incrementAndGet();
                 MarketData marketData = new MarketData(id, count, count - 0.5, count + .5);
-                System.out.println(id + "Publishing " + marketData);
                 subject.onNext(marketData);
-            }, 1, 1, TimeUnit.SECONDS);
+            }, 1, 1, TimeUnit.MILLISECONDS);
     }
 
     public void stopPublishing(){

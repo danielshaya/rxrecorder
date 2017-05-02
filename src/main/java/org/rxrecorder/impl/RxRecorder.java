@@ -37,7 +37,7 @@ public class RxRecorder {
         long fromTime = System.currentTimeMillis();
 
         Observable observable = Observable.create(subscriber -> {
-            try (ChronicleQueue queue = SingleChronicleQueueBuilder.binary(fileName).build()) {
+            try (ChronicleQueue queue = createQueue()) {
                 ExcerptTailer tailer = queue.createTailer();
                 long[] lastTime = new long[]{Long.MIN_VALUE};
                 boolean[] stop = new boolean[]{false};
@@ -175,11 +175,9 @@ public class RxRecorder {
     }
 
     public void record(Observable<?> observable, String filter) {
-        ExcerptAppender appender;
+        ChronicleQueue queue = createQueue();
 
-        try (ChronicleQueue queue = SingleChronicleQueueBuilder.binary(fileName).build()) {
-            appender = queue.acquireAppender();
-        }
+        ExcerptAppender appender = queue.acquireAppender();
 
         Consumer consumer = t -> appender.writeDocument(w -> {
             w.getValueOut().int64(System.currentTimeMillis());
@@ -208,7 +206,7 @@ public class RxRecorder {
 
     public void writeToFile(String fileName, boolean toStdout){
         LOG.info("Writing recording to fileName [" + fileName + "]");
-        try (ChronicleQueue queue = SingleChronicleQueueBuilder.binary(this.fileName).build()) {
+        try (ChronicleQueue queue = createQueue()) {
             ExcerptTailer tailer = queue.createTailer();
             try {
                 QueueUtils.writeQueueToFile(tailer, fileName, toStdout);
@@ -218,6 +216,17 @@ public class RxRecorder {
             }
         }
         LOG.info("Writing to fileName complete");
+    }
+
+    private ChronicleQueue createQueue(){
+        int blockSize = Integer.getInteger("chronicle.queueBlockSize", -1);
+        ChronicleQueue queue = null;
+        if(blockSize==-1) {
+            queue = SingleChronicleQueueBuilder.binary(fileName).build();
+        }else {
+            queue = SingleChronicleQueueBuilder.binary(fileName).blockSize(blockSize).build();
+        }
+        return queue;
     }
 
     public void init(String file, boolean clearCache) throws IOException {

@@ -25,8 +25,8 @@ public class RxRecoderTest {
     public void testPlayback() throws IOException, InterruptedException {
         //Create the rxRecorder but don't delete the cache that has been created.
         RxRecorder rxRecorder = new RxRecorder();
-        rxRecorder.init("/tmp/rectest", false);
-        rxRecorder.writeToFile("/tmp/rectest/rctext.txt", true);
+        rxRecorder.init("src/test/resources/", false);
+        rxRecorder.writeToFile("/tmp/rctext.txt", true);
 
         //Get the input from the recorder
         ReplayOptions options= new ReplayOptions()

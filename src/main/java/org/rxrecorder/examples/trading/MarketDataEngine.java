@@ -1,5 +1,6 @@
 package org.rxrecorder.examples.trading;
 
+import org.rxrecorder.util.DSUtil;
 import rx.Subscriber;
 
 /**
@@ -19,11 +20,12 @@ public class MarketDataEngine extends Subscriber<MarketData> {
 
     @Override
     public void onError(Throwable throwable) {
-
+        throwable.printStackTrace();
     }
 
     @Override
     public void onNext(MarketData marketData) {
+        DSUtil.sleep(1000);
         System.out.println(id + ": MaketDataEngine consumed " + marketData);
     }
 }
