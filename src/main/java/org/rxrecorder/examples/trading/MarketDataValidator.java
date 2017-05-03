@@ -2,6 +2,7 @@ package org.rxrecorder.examples.trading;
 
 import org.rxrecorder.impl.RxRecorder;
 import rx.Observable;
+import rx.subjects.PublishSubject;
 
 import java.io.IOException;
 import java.util.concurrent.Executors;
@@ -30,14 +31,14 @@ public class MarketDataValidator {
 
         Observable<MarketData> marketDataObservable = null;
 
-        MarketDataPublisher marketDataPublisher = new MarketDataPublisher("MKT1");
-        marketDataPublisher.startPublishing();
-        marketDataObservable = marketDataPublisher.getObservable();
+        MarketDataFastProducer marketDataFastProducer = new MarketDataFastProducer("MKT1", PublishSubject.create());
+        marketDataFastProducer.startPublishing(1);
+        marketDataObservable = marketDataFastProducer.getObservable();
         rxRecorder.validate(marketDataObservable, "");
 
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         executor.schedule(()->{
-            marketDataPublisher.stopPublishing();
+            marketDataFastProducer.stopPublishing();
         }, 5, TimeUnit.SECONDS);
 
         executor.shutdown();

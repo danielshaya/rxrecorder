@@ -200,16 +200,16 @@ public class RxRecorder {
             });
     }
 
-    public void writeToFile(String fileName){
-        writeToFile(fileName, false);
+    public void writeToFile(String fileOutput){
+        writeToFile(fileOutput, false);
     }
 
-    public void writeToFile(String fileName, boolean toStdout){
-        LOG.info("Writing recording to fileName [" + fileName + "]");
+    public void writeToFile(String fileOutput, boolean toStdout){
+        LOG.info("Writing recording to fileName [" + fileOutput + "]");
         try (ChronicleQueue queue = createQueue()) {
             ExcerptTailer tailer = queue.createTailer();
             try {
-                QueueUtils.writeQueueToFile(tailer, fileName, toStdout);
+                QueueUtils.writeQueueToFile(tailer, fileOutput, toStdout);
             } catch (IOException e) {
                 //todo log this
                 e.printStackTrace();

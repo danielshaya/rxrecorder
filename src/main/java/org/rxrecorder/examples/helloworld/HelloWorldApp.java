@@ -50,6 +50,6 @@ public class HelloWorldApp {
         observableInput.connect();
 
         //Sometimes useful to see the recording written to a file
-        rxRecorder.writeToFile("/tmp/Demo/demo.txt", true);
+        rxRecorder.writeToFile("/tmp/Demo/demo.txt",true);
     }
 }

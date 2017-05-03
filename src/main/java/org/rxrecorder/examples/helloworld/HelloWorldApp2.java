@@ -53,6 +53,6 @@ public class HelloWorldApp2 {
                 ()->LOG.info("HelloWorld2 Complete"));
         recordedObservable.connect();
         //Sometimes useful to see the recording written to a file
-        rxRecorder.writeToFile("/tmp/Demo/demo.txt", true);
+        rxRecorder.writeToFile("/tmp/Demo/demo.txt",true);
     }
 }

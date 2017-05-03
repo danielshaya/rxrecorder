@@ -3,6 +3,7 @@ package org.rxrecorder.examples.trading;
 import org.rxrecorder.impl.ReplayOptions;
 import org.rxrecorder.impl.RxRecorder;
 import rx.Observable;
+import rx.subjects.PublishSubject;
 
 import java.io.IOException;
 import java.util.concurrent.Executors;
@@ -23,18 +24,18 @@ public class MarketDataAppTest {
         RxRecorder rxRecorder = new RxRecorder();
         rxRecorder.init(file, clearCache);
 
-        MarketDataEngine marketDataEngine = new MarketDataEngine("MKT1");
+        SlowMarketDataConsumer slowMarketDataConsumer = new SlowMarketDataConsumer("MKT1");
         Observable<MarketData> marketDataObservable = null;
 
         if(mode == Mode.LIVE) {
-            MarketDataPublisher marketDataPublisher = new MarketDataPublisher("MKT1");
-            marketDataPublisher.startPublishing();
-            marketDataObservable = marketDataPublisher.getObservable();
+            MarketDataFastProducer marketDataFastProducer = new MarketDataFastProducer("MKT1", PublishSubject.create());
+            marketDataFastProducer.startPublishing(1);
+            marketDataObservable = marketDataFastProducer.getObservable();
             rxRecorder.record(marketDataObservable);
 
             ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
             executorService.schedule(()->{
-                marketDataPublisher.stopPublishing();
+                marketDataFastProducer.stopPublishing();
             }, 5, TimeUnit.SECONDS);
 
             executorService.shutdown();
@@ -44,7 +45,7 @@ public class MarketDataAppTest {
            marketDataObservable = rxRecorder.play(new ReplayOptions());
         }
 
-        marketDataObservable.subscribe(marketDataEngine);
+        marketDataObservable.subscribe(slowMarketDataConsumer);
     }
 
 
@@ -53,16 +54,16 @@ public class MarketDataAppTest {
         RxRecorder rxRecorder = new RxRecorder();
         rxRecorder.init(file, clearCache);
 
-        MarketDataEngine marketDataEngine = new MarketDataEngine("MKT1");
+        SlowMarketDataConsumer slowMarketDataConsumer = new SlowMarketDataConsumer("MKT1");
         Observable<MarketData> marketDataObservable = null;
 
-            MarketDataPublisher marketDataPublisher = new MarketDataPublisher("MKT1");
-            marketDataPublisher.startPublishing();
-            marketDataObservable = marketDataPublisher.getObservable();
+            MarketDataFastProducer marketDataFastProducer = new MarketDataFastProducer("MKT1", PublishSubject.create());
+            marketDataFastProducer.startPublishing(1);
+            marketDataObservable = marketDataFastProducer.getObservable();
             rxRecorder.validate(marketDataObservable, "");
 
             Executors.newScheduledThreadPool(1).schedule(()->{
-                marketDataPublisher.stopPublishing();
+                marketDataFastProducer.stopPublishing();
             }, 5, TimeUnit.SECONDS);
         }
 }
