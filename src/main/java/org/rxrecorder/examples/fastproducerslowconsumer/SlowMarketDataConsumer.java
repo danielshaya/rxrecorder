@@ -1,4 +1,4 @@
-package org.rxrecorder.examples.trading;
+package org.rxrecorder.examples.fastproducerslowconsumer;
 
 import org.rxrecorder.util.DSUtil;
 import rx.Subscriber;
@@ -8,9 +8,12 @@ import rx.Subscriber;
  */
 public class SlowMarketDataConsumer extends Subscriber<MarketData> {
     private String id;
+    private int delayMS;
+    private int count;
 
-    public SlowMarketDataConsumer(String id) {
+    public SlowMarketDataConsumer(String id, int delayMS) {
         this.id = id;
+        this.delayMS = delayMS;
     }
 
     @Override
@@ -21,12 +24,11 @@ public class SlowMarketDataConsumer extends Subscriber<MarketData> {
     @Override
     public void onError(Throwable throwable) {
         throwable.printStackTrace();
-        System.exit(0);
     }
 
     @Override
     public void onNext(MarketData marketData) {
-        DSUtil.sleep(1000);
-        System.out.println(id + ": SlowMarketDataConsumer consumed " + marketData);
+        DSUtil.sleep(delayMS);
+        System.out.println(++count + ":" + id + ": SlowMarketDataConsumer consumed " + marketData);
     }
 }

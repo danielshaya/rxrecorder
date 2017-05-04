@@ -1,5 +1,8 @@
 package org.rxrecorder.examples.trading;
 
+import org.rxrecorder.examples.fastproducerslowconsumer.MarketData;
+import org.rxrecorder.examples.fastproducerslowconsumer.FastProducer;
+import org.rxrecorder.examples.fastproducerslowconsumer.SlowMarketDataConsumer;
 import org.rxrecorder.impl.ReplayOptions;
 import org.rxrecorder.impl.RxRecorder;
 import rx.Observable;
@@ -24,11 +27,11 @@ public class MarketDataAppTest {
         RxRecorder rxRecorder = new RxRecorder();
         rxRecorder.init(file, clearCache);
 
-        SlowMarketDataConsumer slowMarketDataConsumer = new SlowMarketDataConsumer("MKT1");
+        SlowMarketDataConsumer slowMarketDataConsumer = new SlowMarketDataConsumer("MKT1", 1000);
         Observable<MarketData> marketDataObservable = null;
 
         if(mode == Mode.LIVE) {
-            MarketDataFastProducer marketDataFastProducer = new MarketDataFastProducer("MKT1", PublishSubject.create());
+            FastProducer marketDataFastProducer = new FastProducer("MKT1", PublishSubject.create());
             marketDataFastProducer.startPublishing(1);
             marketDataObservable = marketDataFastProducer.getObservable();
             rxRecorder.record(marketDataObservable);
@@ -54,10 +57,10 @@ public class MarketDataAppTest {
         RxRecorder rxRecorder = new RxRecorder();
         rxRecorder.init(file, clearCache);
 
-        SlowMarketDataConsumer slowMarketDataConsumer = new SlowMarketDataConsumer("MKT1");
+        SlowMarketDataConsumer slowMarketDataConsumer = new SlowMarketDataConsumer("MKT1", 1000);
         Observable<MarketData> marketDataObservable = null;
 
-            MarketDataFastProducer marketDataFastProducer = new MarketDataFastProducer("MKT1", PublishSubject.create());
+            FastProducer marketDataFastProducer = new FastProducer("MKT1", PublishSubject.create());
             marketDataFastProducer.startPublishing(1);
             marketDataObservable = marketDataFastProducer.getObservable();
             rxRecorder.validate(marketDataObservable, "");

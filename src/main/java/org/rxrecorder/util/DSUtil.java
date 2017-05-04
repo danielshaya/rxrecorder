@@ -11,4 +11,12 @@ public class DSUtil {
             e.printStackTrace();
         }
     }
+
+    public static void exitAfter(int timeMs) {
+        new Thread(()->{
+            sleep(timeMs);
+            System.out.println("Exiting after waiting " + timeMs + "ms");
+            System.exit(0);
+        }).start();
+    }
 }

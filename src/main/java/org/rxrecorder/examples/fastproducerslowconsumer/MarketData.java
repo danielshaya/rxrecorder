@@ -1,4 +1,4 @@
-package org.rxrecorder.examples.trading;
+package org.rxrecorder.examples.fastproducerslowconsumer;
 
 import net.openhft.chronicle.wire.Marshallable;
 
