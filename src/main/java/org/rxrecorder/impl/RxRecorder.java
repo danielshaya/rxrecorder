@@ -68,7 +68,7 @@ public class RxRecorder {
                             lastTime[0] = recordedAtTime;
                         }
                     });
-                    if (!foundItem && !options.waitForMoreItems() || stop[0]) {
+                    if (!foundItem && !options.completeAtEndOfFile() || stop[0]) {
                         subscriber.onCompleted();
                         return;
                     }

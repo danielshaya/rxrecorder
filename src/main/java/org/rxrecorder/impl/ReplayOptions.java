@@ -75,11 +75,11 @@ public class ReplayOptions {
         return this;
     }
 
-    public boolean waitForMoreItems() {
+    public boolean completeAtEndOfFile() {
         return waitForMoreItems;
     }
 
-    public ReplayOptions waitForMoreItems(boolean waitForMoreItems) {
+    public ReplayOptions completeAtEndOfFile(boolean waitForMoreItems) {
         this.waitForMoreItems = waitForMoreItems;
         return this;
     }

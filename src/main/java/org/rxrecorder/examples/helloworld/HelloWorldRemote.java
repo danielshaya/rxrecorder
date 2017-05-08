@@ -18,13 +18,13 @@ public class HelloWorldRemote {
     public static void main(String... args) throws IOException, InterruptedException {
         //Create the rxRecorder but don't delete the cache that has been created.
         RxRecorder rxRecorder = new RxRecorder();
-        rxRecorder.init(HelloWorldApp.FILE_NAME, false);
+        rxRecorder.init(HelloWorldAppCold.FILE_NAME, false);
         //Get the input from the remote process
-        ReplayOptions options = new ReplayOptions().filter(HelloWorldApp.INPUT_FILTER).playFromNow(true);
+        ReplayOptions options = new ReplayOptions().filter(HelloWorldAppCold.INPUT_FILTER).playFromNow(true);
         ConnectableObservable<Byte> remoteInput = rxRecorder.play(options).publish();
 
-        BytesToWords bytesToWords = new BytesToWords();
-        Observable<String> observableOutput = bytesToWords.init(remoteInput);
+        BytesToWordsProcessor bytesToWords = new BytesToWordsProcessor();
+        Observable<String> observableOutput = bytesToWords.process(remoteInput);
 
 
         observableOutput.subscribe(

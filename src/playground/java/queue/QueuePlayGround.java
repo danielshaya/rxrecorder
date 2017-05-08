@@ -5,7 +5,7 @@ import net.openhft.chronicle.queue.ExcerptAppender;
 import net.openhft.chronicle.queue.ExcerptTailer;
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueueBuilder;
 import net.openhft.chronicle.wire.ValueIn;
-import org.rxrecorder.examples.trading.Trade;
+import org.rxrecorder.examples.fastproducerslowconsumer.MarketData;
 import org.rxrecorder.util.DSUtil;
 
 import java.util.concurrent.Executors;
@@ -29,7 +29,7 @@ public class QueuePlayGround {
                 final int f = i;
                 appender.writeDocument(w -> {
                     w.getValueOut().int64(System.currentTimeMillis());
-                    w.getValueOut().object(new Trade());
+                    w.getValueOut().object(new MarketData());
                 });
                 DSUtil.sleep(100);
             }
@@ -48,7 +48,7 @@ public class QueuePlayGround {
                 final int f = i;
                 appender.writeDocument(w -> {
                     w.getValueOut().int64(System.currentTimeMillis());
-                    w.getValueOut().object(new Trade());
+                    w.getValueOut().object(new MarketData());
                 });
                 DSUtil.sleep(100);
             }
@@ -70,7 +70,7 @@ public class QueuePlayGround {
                         ValueIn in = w.getValueIn();
                         long time = in.int64();
                         String filter = in.text();
-                        Trade trade = in.object(new Trade(), Trade.class);
+                        MarketData trade = in.object(new MarketData(), MarketData.class);
                         System.out.println(time + "->" + trade);
                     });
                 }

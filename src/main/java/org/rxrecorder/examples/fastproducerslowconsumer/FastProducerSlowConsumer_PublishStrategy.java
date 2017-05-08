@@ -12,7 +12,7 @@ import java.io.IOException;
 public class FastProducerSlowConsumer_PublishStrategy {
 
     public static void main(String[] args) throws IOException {
-        SlowMarketDataConsumer slowMarketDataConsumer = new SlowMarketDataConsumer("MKT1", 1000);
+        SlowConsumer slowMarketDataConsumer = new SlowConsumer("MKT1", 1000);
 
         Subject<MarketData, MarketData> marketDataSubject = PublishSubject.create();
         FastProducer marketDataFastProducer = new FastProducer("MKT1", marketDataSubject);

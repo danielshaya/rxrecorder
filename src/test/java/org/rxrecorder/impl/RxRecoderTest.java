@@ -2,8 +2,8 @@ package org.rxrecorder.impl;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.rxrecorder.examples.helloworld.BytesToWords;
-import org.rxrecorder.examples.helloworld.HelloWorldApp;
+import org.rxrecorder.examples.helloworld.BytesToWordsProcessor;
+import org.rxrecorder.examples.helloworld.HelloWorldAppCold;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.rxrecorder.impl.RxRecorder.Replay;
@@ -15,7 +15,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
- *  A Junit test class to test BytesToWords
+ *  A Junit test class to test BytesToWordsProcessor
  */
 public class RxRecoderTest {
     private static final Logger LOG = LoggerFactory.getLogger(RxRecoderTest.class.getName());
@@ -30,21 +30,21 @@ public class RxRecoderTest {
 
         //Get the input from the recorder
         ReplayOptions options= new ReplayOptions()
-                .filter(HelloWorldApp.INPUT_FILTER)
+                .filter(HelloWorldAppCold.INPUT_FILTER)
                 .replayStrategy(REPLAY_STRATEGY)
-                .waitForMoreItems(false);
+                .completeAtEndOfFile(false);
         ConnectableObservable<Byte> observableInput = rxRecorder.play(options).publish();
 
-        BytesToWords bytesToWords = new BytesToWords();
-        Observable<String> observableOutput = bytesToWords.init(observableInput);
+        BytesToWordsProcessor bytesToWords = new BytesToWordsProcessor();
+        Observable<String> observableOutput = bytesToWords.process(observableInput);
 
         //Send the output stream to the recorder to be validated against the recorded output
-        Observable<ValidationResult> results = rxRecorder.validate(observableOutput, HelloWorldApp.OUTPUT_FILTER);
+        Observable<ValidationResult> results = rxRecorder.validate(observableOutput, HelloWorldAppCold.OUTPUT_FILTER);
 
         CountDownLatch latch = new CountDownLatch(1);
         results.subscribe(
                 s->LOG.info(s.toString()),
-                e-> LOG.error("Problem in init test [{}]", e),
+                e-> LOG.error("Problem in process test [{}]", e),
                 ()->{
                     LOG.info("Summary[" + rxRecorder.getValidationResult().summaryResult()
                             + "] items compared[" + rxRecorder.getValidationResult().summaryItemsCompared()

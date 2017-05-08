@@ -17,11 +17,12 @@ public class FastProducerSlowConsumerWithRxRecorder {
 
     public static void main(String[] args) throws IOException {
         DSUtil.exitAfter(10_000);
+        System.setProperty("chronicle.queueBlockSize", "1");
 
         RxRecorder rxRecorder = new RxRecorder();
         rxRecorder.init(file, true);
 
-        SlowMarketDataConsumer slowMarketDataConsumer = new SlowMarketDataConsumer("MKT1", 1000);
+        SlowConsumer slowMarketDataConsumer = new SlowConsumer("MKT1", 1000);
 
         FastProducer marketDataFastProducer = new FastProducer("MKT1", PublishSubject.create());
         marketDataFastProducer.startPublishing(1);

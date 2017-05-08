@@ -16,7 +16,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
- *  A Junit test class to test BytesToWords
+ *  A Junit test class to test BytesToWordsProcessor
  */
 public class HelloWorldTest {
     private static final Logger LOG = LoggerFactory.getLogger(HelloWorldTest.class.getName());
@@ -26,22 +26,22 @@ public class HelloWorldTest {
     public void testHelloWorld() throws IOException, InterruptedException {
         //Create the rxRecorder but don't delete the cache that has been created.
         RxRecorder rxRecorder = new RxRecorder();
-        rxRecorder.init(HelloWorldApp.FILE_NAME, false);
+        rxRecorder.init(HelloWorldAppCold.FILE_NAME, false);
 
         //Get the input from the recorder
-        ReplayOptions options= new ReplayOptions().filter(HelloWorldApp.INPUT_FILTER).replayStrategy(REPLAY_STRATEGY);
+        ReplayOptions options= new ReplayOptions().filter(HelloWorldAppCold.INPUT_FILTER).replayStrategy(REPLAY_STRATEGY);
         ConnectableObservable<Byte> observableInput = rxRecorder.play(options).publish();
 
-        BytesToWords bytesToWords = new BytesToWords();
-        Observable<String> observableOutput = bytesToWords.init(observableInput);
+        BytesToWordsProcessor bytesToWords = new BytesToWordsProcessor();
+        Observable<String> observableOutput = bytesToWords.process(observableInput);
 
         //Send the output stream to the recorder to be validated against the recorded output
-        Observable<ValidationResult> results = rxRecorder.validate(observableOutput, HelloWorldApp.OUTPUT_FILTER);
+        Observable<ValidationResult> results = rxRecorder.validate(observableOutput, HelloWorldAppCold.OUTPUT_FILTER);
 
         CountDownLatch latch = new CountDownLatch(1);
         results.subscribe(
                 s->LOG.info(s.toString()),
-                e-> LOG.error("Problem in init test [{}]", e),
+                e-> LOG.error("Problem in process test [{}]", e),
                 ()->{
                     LOG.info("Summary[" + rxRecorder.getValidationResult().summaryResult()
                             + "] items compared[" + rxRecorder.getValidationResult().summaryItemsCompared()

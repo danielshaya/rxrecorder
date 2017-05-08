@@ -1,6 +1,5 @@
 package org.rxrecorder.examples.fastproducerslowconsumer;
 
-import org.rxrecorder.examples.helloworld.BytesToWords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
